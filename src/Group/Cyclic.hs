@@ -2,7 +2,8 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Cyclic (
-  Cyclic (Cyclic)
+  Cyclic (Cyclic),
+  display
   ) where
 
 import Group
@@ -24,11 +25,7 @@ instance CountableGroup Integer
 -- | (Zn, +) Integers with addition modulo n
 newtype Cyclic (n :: Nat)
   = Cyclic Integer
-  deriving (Read, Eq)
-
-instance (KnownNat n) => Show (Cyclic n) where
-  show (Cyclic i) = show i
---   show (Cyclic i) = "Z/" ++ show (natVal (Proxy :: Proxy n)) ++ " " ++ show i
+  deriving (Eq, Read, Show)
 
 instance (KnownNat n) => Enum (Cyclic n) where
   toEnum i = (Cyclic (toInteger i))
@@ -48,3 +45,6 @@ instance (KnownNat n) => Group (Cyclic n) where
 instance (KnownNat n) => AbelianGroup (Cyclic n)
 instance (KnownNat n) => CountableGroup (Cyclic n)
 instance (KnownNat n) => FiniteGroup (Cyclic n)
+
+display :: forall n . (KnownNat n) => Cyclic n -> String
+display (Cyclic i) = "Z/" ++ show (natVal (Proxy :: Proxy n)) ++ " " ++ show i

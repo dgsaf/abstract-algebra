@@ -4,7 +4,8 @@
 module Symmetric (
   Symmetric,
   fromCycles,
-  permute
+  permute,
+  display
   ) where
 
 import Group
@@ -18,28 +19,18 @@ import Prelude
 
 newtype Symmetric (n :: Nat)
   = Symmetric (Map Integer Integer)
-  deriving (Eq, Read)
-
-instance (KnownNat n) => Show (Symmetric n) where
-  show phi
-    | List.null cycles = "e"
-    | otherwise = concat $ fmap dispCycle cycles
-    where
-      cycles = toCycles phi
-      dispCycle cs
-        | List.null cs = ""
-        | otherwise =
-          "("
-          ++ show (head cs)
-          ++ concat (fmap (\i -> " " ++ show i) (tail cs))
-          ++ ")"
+  deriving (Eq, Read, Show)
 
 instance (KnownNat n) => Monoid (Symmetric n) where
   mempty = Symmetric Map.empty
   mappend phi@(Symmetric m) psi@(Symmetric p)
+    -- = Symmetric
+    -- $ filterWithKey (\i j -> i /= j)
+    -- $ Map.union (Map.map (\j -> permute psi j) m) p
     = Symmetric
     $ filterWithKey (\i j -> i /= j)
-    $ Map.union (Map.map (\j -> permute psi j) m) p
+    $ Map.fromSet (\i -> permute psi (permute phi i))
+    $ Set.fromDistinctAscList [1 .. (natVal (Proxy :: Proxy n))]
 
 instance (KnownNat n) => Group (Symmetric n) where
   inverse phi = fromCycles $ fmap (reverse) (toCycles phi)
@@ -72,3 +63,15 @@ fromCycles cycles
     fromCycle cs
       | Prelude.null cs || Prelude.null (tail cs) = Map.empty
       | otherwise = Map.fromList $ zip cs (last cs : cs)
+
+display :: forall n . (KnownNat n) => Symmetric n -> String
+display phi
+  | List.null cycles = "e"
+  | otherwise = concat $ fmap dispCycle cycles
+  where
+    cycles = toCycles phi
+    dispCycle cs =
+      "("
+      ++ show (head cs)
+      ++ concat (fmap (\i -> " " ++ show i) (tail cs))
+      ++ ")"

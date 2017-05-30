@@ -3,7 +3,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Group (
   Group, identity, operation, inverse, (<>),
-  generateTree, generateSubgroup, generateTable,
+  cayleyTree, cayleyTable, generate, cayleyGraph,
   AbelianGroup,
   CountableGroup,
   elements,
@@ -14,7 +14,7 @@ module Group (
 import Data.List (genericLength, elem, nub, elemIndex)
 import Data.Maybe (fromJust)
 import Data.Monoid ((<>))
-import Data.Tree as Tree (Tree(..), unfoldTree, flatten)
+import Data.Tree as Tree (Tree(..), unfoldTree, unfoldTreeM_BF, flatten)
 
 -- | Group
 -- where the following holds for all x, y, z :: g
@@ -33,30 +33,35 @@ class (Eq g, Monoid g) => Group g where
   inverse :: g -> g
 
 -- | Generating set
--- a generating set is used to explore the group as a tree
--- tree nodes are of the form (x_k <> g, [x_1 .. x_k]) where x_k are the
--- previously generated elements and g is the generating element used to
--- generate this particular node
-generateTree :: (Group g) => [g] -> Tree (g, [g])
-generateTree gs = fmap h $ Tree.unfoldTree f (identity, [])
+-- a generating set is used to explore the group as a tree, for a given element
+-- the left-application of each generator to this element is considered as its
+-- own branch
+cayleyTree :: (Group g) => [g] -> Tree g
+cayleyTree gs = fmap fst $ Tree.unfoldTree f (identity, [])
   where
     gs' = nub gs
     f (x, ps)
       | elem x ps = ((x, x : ps), [])
       | otherwise = ((x, x : ps), fmap (\ge -> (x <> ge, x : ps)) gs')
-    h (x, p:ps)
-      | null ps   = (x, identity : [])
-      | otherwise = (x, ps)
 
-generateSubgroup :: (Group g) => [g] -> [g]
-generateSubgroup gs = nub $ fmap fst $ Tree.flatten $ generateTree gs
+generate :: (Group g) => [g] -> [g]
+generate gs = nub $ Tree.flatten $ cayleyTree gs
 
-generateTable :: (Group g) => [g] -> [(g, g, g)]
-generateTable gs = fmap f $ Tree.flatten $ generateTree gs
+cayleyTable :: (Group g) => [g] -> [(g, g, g)]
+cayleyTable gs = fmap f $ nub $ Tree.flatten $ h identity (cayleyTree gs)
   where
-    f (x, (y:ys)) = (y, inverse y <> x, x)
-
+    f (x, y) = (y, inverse y <> x, x)
     h y (Node x ts) = Node (x, y) (fmap (h x) ts)
+
+cayleyGraph :: (Group g) => [g] -> [(g, Int, [(Int, g)])]
+cayleyGraph gs = fmap (\x -> (x, key x, adjacent x)) fgs
+  where
+    fgs = generate gs
+    ct  = cayleyTable gs
+    key x = fromJust $ elemIndex x fgs
+    adjacent x
+      = fmap (\(_, g, x') -> (key x', g))
+      $ filter ((==) x . (\(a, b, c) -> a)) ct
 
 -- | Abelian Group
 -- where the following holds for all x, y :: g

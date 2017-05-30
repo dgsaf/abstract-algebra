@@ -8,12 +8,14 @@ module Cyclic (
 import Group
 
 import Data.Proxy
-import GHC.TypeLits
+import GHC.TypeLits (KnownNat, Nat, natVal)
 
 -- | (Z, +) Integers with addition
+instance Monoid Integer where
+  mempty = 0
+  mappend = (+)
+
 instance Group Integer where
-  identity = 0
-  operation = (+)
   inverse x = (- x)
 
 instance AbelianGroup Integer
@@ -22,10 +24,10 @@ instance CountableGroup Integer
 -- | (Zn, +) Integers with addition modulo n
 newtype Cyclic (n :: Nat)
   = Cyclic Integer
-  deriving (Read, Show, Eq)
+  deriving (Read, Eq)
 
--- instance (KnownNat n) => Show (Cyclic n) where
---   show (Cyclic i) = show i
+instance (KnownNat n) => Show (Cyclic n) where
+  show (Cyclic i) = show i
 --   show (Cyclic i) = "Z/" ++ show (natVal (Proxy :: Proxy n)) ++ " " ++ show i
 
 instance (KnownNat n) => Enum (Cyclic n) where
@@ -36,9 +38,11 @@ instance (KnownNat n) => Bounded (Cyclic n) where
   minBound = (Cyclic 0)
   maxBound = (Cyclic (natVal (Proxy :: Proxy n) - 1))
 
+instance (KnownNat n) => Monoid (Cyclic n) where
+  mempty = Cyclic 0
+  mappend (Cyclic i) (Cyclic j) = Cyclic $ mod (i + j) (natVal (Proxy :: Proxy n))
+
 instance (KnownNat n) => Group (Cyclic n) where
-  identity = Cyclic 0
-  operation (Cyclic i) (Cyclic j) = Cyclic $ mod (i + j) (natVal (Proxy :: Proxy n))
   inverse (Cyclic i) = (Cyclic $ (natVal (Proxy :: Proxy n)) - i)
 
 instance (KnownNat n) => AbelianGroup (Cyclic n)

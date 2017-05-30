@@ -5,21 +5,30 @@ import Group
 import Cyclic
 import Symmetric
 
+import Data.Graph
 import Data.Tree
 
 main :: IO ()
 main = do
-  let
-    m = Cyclic 1 :: Cyclic 4
-    m' = Cyclic 3 :: Cyclic 4
-    gtree = generate [m, m']
-  putStrLn $ drawTree $ fmap show $ gtree
+  -- let
+  --   i = Cyclic 1 :: Cyclic 4
+  --   j = Cyclic 2 :: Cyclic 4
+
+  -- putStrLn $ drawTree $ fmap show $ generate [i, j]
+  -- putStrLn $ show $ cayley [i, j]
 
   let
-    phi = fromCycle [3,4,1] :: Symmetric 4
-    psi = fromCycle [1,3,4,2] :: Symmetric 4
-  putStrLn $ show phi
-  putStrLn $ show psi
-  putStrLn $ show $ operation phi psi
-  putStrLn $ show $ inverse phi
-  putStrLn $ show $ operation phi (inverse phi)
+    phi1 = fromCycles [[1, 2]] :: Symmetric 3
+    phi2 = fromCycles [[2, 3]] :: Symmetric 3
+    phi3 = fromCycles [[3, 1]] :: Symmetric 3
+
+  putStrLn $ drawTree $ fmap show $ generateTree [phi1, phi2]
+  putStrLn $ show $ fmap show $ generateSubgroup [phi1, phi2]
+
+  -- print $ phi1
+  -- print $ phi2
+  -- print $ phi1 <> phi2
+  -- putStrLn $ drawTree $ fmap (show . fst) $ generate [phi1]
+  -- putStrLn $ drawTree $ fmap (show . fst) $ generate [phi1, phi2]
+  -- putStrLn $ drawTree $ fmap (show . fst) $ generate [phi1, phi2, phi3]
+  -- putStrLn $ show $ cayley [phi1, phi2]

@@ -30,7 +30,9 @@ executable abstract-algebra-exe
   build-depends:       base
                      , abstract-algebra
                      , containers >= 0.5.7.1
-                     , diagrams >= 1.4
+                     , diagrams-lib >= 1.4.0.1
+                     , diagrams-contrib >= 1.4.0.1
+                     , diagrams-svg >= 1.4.0.1
   default-language:    Haskell2010
 
 test-suite abstract-algebra-test

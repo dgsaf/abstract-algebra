@@ -9,36 +9,66 @@ import Group
 import Cyclic
 import Symmetric
 
-import Data.Graph
 import Data.Tree
 
+import Diagrams.Backend.SVG.CmdLine
+import Diagrams.Prelude
+import Diagrams.TwoD.Layout.Tree
+import Diagrams.TwoD.Sunburst
+-- import Diagrams.TwoD.GraphViz
+
 main :: IO ()
-main = do
-  let
-    i = Cyclic 1 :: Cyclic 4
-    j = Cyclic 2 :: Cyclic 4
+main = mainWith (drawSunburst t1
+                 ||| drawSunburst t2
+                 ||| drawSunburst t3
+                 ||| drawSunburst t4)
+  where
+    x1 = Cyclic 1 :: Cyclic 6
+    x2 = Cyclic 2 :: Cyclic 6
+    x3 = Cyclic 3 :: Cyclic 6
+    x4 = Cyclic 4 :: Cyclic 6
+    t1 = fmap show $ cayleyTree [x1]
+    t2 = fmap show $ cayleyTree [x1, x2]
+    t3 = fmap show $ cayleyTree [x1, x2, x3]
+    t4 = fmap show $ cayleyTree [x1, x2, x3, x4]
+    -- t3 = fmap show $ cayleyTree [x1]
+    -- t4 = fmap show $ cayleyTree [x1]
+    -- x1 = fromCycles [[1, 2]] :: Symmetric 4
+    -- x2 = fromCycles [[2, 3]] :: Symmetric 4
+    -- x3 = fromCycles [[3, 4]] :: Symmetric 4
+    -- t = fmap Symmetric.display $ cayleyTree [x1, x2]
+
+drawSunburst :: Tree a -> Diagram B
+drawSunburst t = sunburst t # centerXY # pad 1.1
+
+drawSymmetric :: Tree String -> Diagram B
+drawSymmetric t = renderTree (\n ->
+                text n # fontSizeG 0.5
+                <> circle 1.5 # fc white # lw thin)
+    (~~) (symmLayout' (with & slHSep .~ 4 & slVSep .~ 4) t)
+       # centerXY # pad 1.1
+
+-- main :: IO ()
+-- main = do
+  -- let
+  --   i = Cyclic 1 :: Cyclic 4
+  --   j = Cyclic 2 :: Cyclic 4
 
   -- putStrLn $ drawTree $ fmap show $ cayleyTree [i, j]
   -- putStrLn $ show $ fmap show $ generate [i, j]
   -- putStrLn $ concat $ fmap (\s -> show s ++ "\n") $ cayleyTable [i, j]
 
-  let
-    phi1 = fromCycles [[1, 2]] :: Symmetric 4
-    phi2 = fromCycles [[2, 3]] :: Symmetric 4
-    phi3 = fromCycles [[3, 4]] :: Symmetric 4
-    phi4 = fromCycles [[4, 1]] :: Symmetric 4
+  -- let
+  --   phi1 = fromCycles [[1, 2]] :: Symmetric 4
+  --   phi2 = fromCycles [[2, 3]] :: Symmetric 4
+  --   phi3 = fromCycles [[3, 4]] :: Symmetric 4
+  --   phi4 = fromCycles [[4, 1]] :: Symmetric 4
 
-  putStrLn $ drawTree $ fmap Symmetric.display $ cayleyTree [phi1, phi4]
-  putStrLn $ show $ fmap Symmetric.display $ generate [phi1, phi4]
+  --   ctree = cayleyTree [phi1, phi2]
+
+  -- putStrLn $ drawTree $ fmap Symmetric.display $ cayleyTree [phi1, phi4]
+  -- putStrLn $ show $ fmap Symmetric.display $ generate [phi1, phi4]
   -- putStrLn $ concat $ fmap (\s -> show s ++ "\n") $ cayleyTable [phi1, phi4]
-  putStrLn $ concat
-    $ fmap (\(x,k,es) -> Symmetric.display x ++ " : " ++ show k ++ " >> " ++ concat (fmap (\(k', g) -> "(" ++ show k' ++ " " ++ Symmetric.display g ++ ") ") es) ++ "\n")
-    $ cayleyGraph [phi1, phi4]
-
-  -- print $ phi1
-  -- print $ phi2
-  -- print $ phi1 <> phi2
-  -- putStrLn $ drawTree $ fmap (show . fst) $ generate [phi1]
-  -- putStrLn $ drawTree $ fmap (show . fst) $ generate [phi1, phi2]
-  -- putStrLn $ drawTree $ fmap (show . fst) $ generate [phi1, phi2, phi3]
-  -- putStrLn $ show $ cayley [phi1, phi2]
+  -- putStrLn $ concat
+  --   $ fmap (\(x,k,es) -> Symmetric.display x ++ " : " ++ show k ++ " >> " ++ concat (fmap (\(k', g) -> "(" ++ show k' ++ " " ++ Symmetric.display g ++ ") ") es) ++ "\n")
+  --   $ cayleyGraph [phi1, phi4]

@@ -2,7 +2,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Group (
-  Group, identity, operation, inverse, (<>),
+  Group, identity, operation, inverse,
   cayleyTree, cayleyTable, generate, cayleyGraph,
   AbelianGroup,
   CountableGroup,
@@ -24,13 +24,13 @@ import Data.Tree as Tree (Tree(..), unfoldTree, unfoldTreeM_BF, flatten)
 -- x <> (inverse x) = (inverse x) <> x = identity
 -- @
 class (Eq g, Monoid g) => Group g where
+  inverse :: g -> g
+
   identity :: g
   identity = mempty
 
   operation :: g -> g -> g
   operation = (<>)
-
-  inverse :: g -> g
 
 -- | Generating set
 -- a generating set is used to explore the group as a tree, for a given element

@@ -6,6 +6,7 @@
 module Main where
 
 import Group
+import Cayley
 import Cyclic
 import Symmetric
 

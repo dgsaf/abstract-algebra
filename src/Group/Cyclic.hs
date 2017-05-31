@@ -25,7 +25,10 @@ instance CountableGroup Integer
 -- | (Zn, +) Integers with addition modulo n
 newtype Cyclic (n :: Nat)
   = Cyclic Integer
-  deriving (Eq, Read, Show)
+  deriving (Eq, Read)
+
+instance (KnownNat n) => Show (Cyclic n) where
+  show x = display x
 
 instance (KnownNat n) => Enum (Cyclic n) where
   toEnum i = (Cyclic (toInteger i))
